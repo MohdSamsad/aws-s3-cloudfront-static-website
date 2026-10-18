@@ -40,3 +40,23 @@ flowchart TD
     style C fill:#1e2a4a,stroke:#7c8cff,color:#e8edf7
     style S fill:#3a1a2a,stroke:#f472b6,color:#e8edf7
 ```
+
+# Prerequisites
+- AWS account with console access
+- Domain name registered (GoDaddy or any registrar)
+- AWS CLI installed and configured (aws configure)
+
+# Step-by-Step Setup
+**1. Delegate DNS to Route 53**   
+- Route 53 → Hosted zones → Create hosted zone → enter your domain → Public.
+- Copy the four NS values from the zone's NS record.
+- At your registrar (GoDaddy): Nameservers → Change → I'll use my own → paste all four.
+- Verify propagation:
+    
+    ```
+    dig NS yourdomain.com +short
+    
+    ```
+    
+
+
