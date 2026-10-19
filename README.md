@@ -7,7 +7,7 @@ This project demonstrates how to deliver a static website at the edge using core
 
 Layer | Service | Role 
 --- | --- | --- 
-Storage | Amazon S3 | Private origin;no public bucket access 
+Storage | Amazon S3 | Private origin; no public bucket access 
 CDN | Amazon CloudFront | Global edge delivery (400+ PoPs) 
 Security | OAC + ACM	 | Signed requests to S3; managed TLS cert 
 DNS | Amazon Route 53 | Public hosted zone; Alias A record at apex 
@@ -22,7 +22,7 @@ flowchart TD
     R["🌐 Route 53
     DNS resolution only
     not in the data path"]
-    R -.->|"IP returned to client\n then Route 53 steps aside"| A
+    R -.->|"IP returned to client<br/>then Route 53 steps aside"| A
     A -->|"HTTPS direct to CloudFront IP"| C
     C["⚡ CloudFront Distribution
     ─────────────────────────
@@ -179,9 +179,10 @@ Still shows registrar parked page | Nameservers not propagated yet | Wait 10–6
 ACM cert stuck on Pending | Validation CNAME not in Route 53 | Check hosted zone for the _acme-challenge record 
 Cert not selectable in CloudFront | Cert not in us-east-1 | Re-request the cert in N. Virginia 
 403 AccessDenied XML at root | Bucket policy missing or OAC not attached | Re-apply policy; confirm OAC is set on the origin
-403 on every path except root | Missing default root object | Set index.html in distribution General → Edit 
+403 at / but /index.html loads | Missing default root object | Set index.html in General → Edit 
 Old content still showing | CloudFront cache | Run an invalidation for /*
 curl: Could not resolve host | No A record in Route 53 | Create the Alias A record (Step 6)
+403 on sub-folders like /about | Default root object applies only to / | Fixed in Phase 2 (viewer-request function)
 
 
 # Cost Estimate
