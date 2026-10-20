@@ -1,7 +1,7 @@
 # aws-s3-cloudfront-static-website
 Static website hosted on Amazon S3, served globally via Amazon CloudFront with Origin Access Control (OAC), custom apex domain on Route 53, and automated TLS via AWS Certificate Manager (ACM).
 
-# Overview
+## Overview
 This project demonstrates how to deliver a static website at the edge using core AWS networking and storage services — with zero servers to manage, automatic HTTPS, and a real custom domain.
 
 
@@ -14,7 +14,7 @@ DNS | Amazon Route 53 | Public hosted zone; Alias A record at apex
 Domain | GoDaddy (registrar) | Nameservers delegated to Route 53 
 
 
-# Architecture
+## Architecture
 
 ```mermaid
 flowchart TD
@@ -41,12 +41,12 @@ flowchart TD
     style S fill:#3a1a2a,stroke:#f472b6,color:#e8edf7
 ```
 
-# Prerequisites
+## Prerequisites
 - AWS account with console access
 - Domain name registered (GoDaddy or any registrar)
 - AWS CLI installed and configured (aws configure)
 
-# Step-by-Step Setup
+## Step-by-Step Setup
 **1. Delegate DNS to Route 53**   
 - Route 53 → Hosted zones → Create hosted zone → enter your domain → Public.
 - Copy the four NS values from the zone's NS record.
@@ -171,7 +171,7 @@ aws cloudfront create-invalidation \
 
 The first 1,000 invalidation paths per month are free.
 
-# Troubleshooting
+## Troubleshooting
 
 Symptom | Likely cause | Fix 
 --- | --- | --- 
@@ -185,7 +185,7 @@ curl: Could not resolve host | No A record in Route 53 | Create the Alias A reco
 403 on sub-folders like /about | Default root object applies only to / | Fixed in Phase 2 (viewer-request function)
 
 
-# Cost Estimate
+## Cost Estimate
 
 Resource | Cost  
 --- | ---  
@@ -196,7 +196,7 @@ S3 storage + requests | 	Negligible for a static site
 
 Total for a demo or portfolio site: ~$0.50 / month.
 
-# Cleanup
+## Cleanup
 To avoid ongoing charges when you're done:
 
 ```
@@ -211,7 +211,7 @@ aws s3api delete-bucket --bucket your-bucket-name
 # 5. Delete the Route 53 hosted zone (will stop the $0.50/month charge)
 ```
 
-# Skills Demonstrated
+## Skills Demonstrated
 - Amazon S3 — private origin with least-privilege OAC instead of legacy OAI
 - Amazon CloudFront — distribution config, cache policies, alternate domains, HTTPS redirect
 - AWS Certificate Manager — DNS-validated public cert in the correct region
