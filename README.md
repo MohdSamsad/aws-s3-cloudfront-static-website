@@ -53,13 +53,14 @@ flowchart TD
 - At your registrar (GoDaddy): Nameservers → Change → I'll use my own → paste all four.
 - Verify propagation:
     
-    ```
+    ```bash
     dig NS yourdomain.com +short
     
     ```
-    
+
 
 ### 2. Create the S3 origin bucket
+
 ```
 aws s3api create-bucket \
   --bucket your-bucket-name \
