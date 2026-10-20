@@ -219,6 +219,7 @@ aws s3api delete-bucket --bucket your-bucket-name
 - DNS management — nameserver delegation from a third-party registrar
 - AWS CLI — bucket creation, policy attachment, sync, cache invalidation
 
-   ## License
+
+## License
 
    [MIT](LICENSE)
