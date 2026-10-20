@@ -221,5 +221,4 @@ aws s3api delete-bucket --bucket your-bucket-name
 
 
 ## License
-
-   [MIT](LICENSE)
+ [MIT](LICENSE)
