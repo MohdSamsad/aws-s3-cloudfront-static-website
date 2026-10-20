@@ -1,1 +1,6 @@
-
+.DS_Store
+*.pem
+.env
+.aws/
+credentials
+node_modules/
