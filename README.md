@@ -1,6 +1,8 @@
 # aws-s3-cloudfront-static-website
 Static website hosted on Amazon S3, served globally via Amazon CloudFront with Origin Access Control (OAC), custom apex domain on Route 53, and automated TLS via AWS Certificate Manager (ACM).
 
+**Live demo :** https://leapmotion.ai
+
 ## Overview
 This project demonstrates how to deliver a static website at the edge using core AWS networking and storage services — with zero servers to manage, automatic HTTPS, and a real custom domain.
 
@@ -53,7 +55,7 @@ flowchart TD
 - At your registrar (GoDaddy): Nameservers → Change → I'll use my own → paste all four.
 - Verify propagation:
     
-```bash 
+``` 
 dig NS yourdomain.com +short
     
 ```
@@ -104,25 +106,14 @@ After creating, copy the OAC bucket policy from the banner and proceed to step 5
 
 ### 5. Attach the bucket policy
 
-Replace the placeholders and save as policies/bucket-policy.json:
+Fill in the placeholders in policies/bucket-policy.json. It grants CloudFront s3:GetObject plus s3:ListBucket, so a missing page returns 404 Not Found instead of a misleading 403 Access Denied.
 
 ```
-{
-  "Version": "2012-10-17",
-  "Statement": [{
-    "Sid": "AllowCloudFrontServicePrincipalReadOnly",
-    "Effect": "Allow",
-    "Principal": { "Service": "cloudfront.amazonaws.com" },
-    "Action": "s3:GetObject",
-    "Resource": "arn:aws:s3:::YOUR-BUCKET-NAME/*",
-    "Condition": {
-      "StringEquals": {
-        "AWS:SourceArn": "arn:aws:cloudfront::<ACCOUNT_ID>:distribution/<DISTRIBUTION_ID>"
-      }
-    }
-  }]
-}
+aws s3api put-bucket-policy \
+  --bucket your-bucket-name \
+  --policy file://policies/bucket-policy.json
 ```
+
 Apply it:
 
 ```
@@ -158,7 +149,8 @@ dig A yourdomain.com +short          # CloudFront IP addresses
 curl -I https://yourdomain.com       # HTTP/2 200 + x-cache header
 ```
 
-**Deploying Updates**
+### Deploying Updates
+
 
 ```
 # Upload changed files
