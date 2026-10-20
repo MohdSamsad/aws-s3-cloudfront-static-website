@@ -47,7 +47,7 @@ flowchart TD
 - AWS CLI installed and configured (aws configure)
 
 ## Step-by-Step Setup
-**1. Delegate DNS to Route 53**   
+### 1. Delegate DNS to Route 53   
 - Route 53 → Hosted zones → Create hosted zone → enter your domain → Public.
 - Copy the four NS values from the zone's NS record.
 - At your registrar (GoDaddy): Nameservers → Change → I'll use my own → paste all four.
@@ -59,7 +59,7 @@ flowchart TD
     ```
     
 
-**2. Create the S3 origin bucket**
+### 2. Create the S3 origin bucket
 ```
 aws s3api create-bucket \
   --bucket your-bucket-name \
@@ -77,7 +77,7 @@ aws s3 cp site/index.html s3://your-bucket-name/index.html \
   --content-type "text/html"
 ```
 
-**3. Request a TLS certificate (ACM)**
+### 3. Request a TLS certificate (ACM)
 
 ⚠️ Must be in us-east-1 — CloudFront only reads certs from that region.
 
@@ -86,7 +86,7 @@ aws s3 cp site/index.html s3://your-bucket-name/index.html \
 - DNS validation → Create records in Route 53 (one click).
 - Wait for status Issued (2–15 min).
 
-**4. Create the CloudFront distribution**
+### 4. Create the CloudFront distribution
 
 Setting | Value  
 --- | ---  
@@ -101,7 +101,7 @@ Default root object | index.html
 
 After creating, copy the OAC bucket policy from the banner and proceed to step 5.
 
-**5. Attach the bucket policy**
+### 5. Attach the bucket policy
 
 Replace the placeholders and save as policies/bucket-policy.json:
 
@@ -136,7 +136,7 @@ curl -I https://xxxxxxxxxxxxxx.cloudfront.net
 # expect: HTTP/2 200
 ```
 
-**6. Create the Route 53 alias record**
+### 6. Create the Route 53 alias record
 
 Route 53 → hosted zone → Create record:
 
@@ -150,7 +150,7 @@ Route traffic to | 	Alias to CloudFront distribution
 
 Repeat with type AAAA for IPv6.
 
-**7. Verify**
+### 7. Verify
 
 ```
 dig A yourdomain.com +short          # CloudFront IP addresses
