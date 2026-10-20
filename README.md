@@ -164,6 +164,13 @@ aws cloudfront create-invalidation \
 
 The first 1,000 invalidation paths per month are free.
 
+## Lessons learned
+
+- **Unlisting a domain does not release it.** After unlisting on Afternic, the nameservers still pointed at Afternic, so the "for sale" page kept appearing. The fix was the nameserver change in step 1.
+- **Correct nameservers are not enough.** `dig NS` returned the Route 53 servers, but `curl` failed with *Could not resolve host*: the hosted zone had no apex A record. Checking `dig NS` and `dig A` separately showed which layer was missing.
+- **Route 53 is not in the data path.** It only answers the DNS lookup; the browser then connects straight to CloudFront's IP addresses.
+- **Test the `*.cloudfront.net` URL first.** It separates CloudFront and S3 problems from DNS problems.
+
 ## Troubleshooting
 
 Symptom | Likely cause | Fix 
