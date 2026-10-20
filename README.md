@@ -218,3 +218,7 @@ aws s3api delete-bucket --bucket your-bucket-name
 - Amazon Route 53 — public hosted zone, Alias records at the apex (no CNAME hack)
 - DNS management — nameserver delegation from a third-party registrar
 - AWS CLI — bucket creation, policy attachment, sync, cache invalidation
+
+   ## License
+
+   [MIT](LICENSE)
