@@ -106,7 +106,7 @@ After creating, copy the OAC bucket policy from the banner and proceed to step 5
 
 ### 5. Attach the bucket policy
 
-Fill in the placeholders in policies/bucket-policy.json. It grants CloudFront s3:GetObject plus s3:ListBucket, so a missing page returns 404 Not Found instead of a misleading 403 Access Denied.
+Fill in the placeholders in [`policies/bucket-policy.json`](policies/bucket-policy.json). It grants CloudFront s3:GetObject plus s3:ListBucket, so a missing page returns 404 Not Found instead of a misleading 403 Access Denied.
 
 ```
 aws s3api put-bucket-policy \
