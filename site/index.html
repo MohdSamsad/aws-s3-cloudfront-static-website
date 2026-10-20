@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Northwind Edge — AWS Cloud Labs</title>
+<meta name="description" content="Northwind Edge is a hands-on AWS Cloud learning lab. This page is itself the project: a static site on Amazon S3, served through Amazon CloudFront with ACM and Route 53.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f8fb;
+    --paper:#ffffff;
+    --ink:#0f172a;
+    --ink-2:#334155;
+    --muted:#64748b;
+    --line:#e2e8f0;
+    --line-2:#cbd5e1;
+    --teal:#0d9488;
+    --teal-soft:#ccfbf1;
+    --indigo:#4f46e5;
+    --indigo-soft:#e0e7ff;
+    --amber:#b45309;
+    --amber-soft:#fef3c7;
+    --green:#15803d;
+    --green-soft:#dcfce7;
+    --slate-soft:#f1f5f9;
+    --radius:14px;
+    --max:1120px;
+    --shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+    background-image:
+      linear-gradient(rgba(15,23,42,.035) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(15,23,42,.035) 1px,transparent 1px);
+    background-size:32px 32px;
+  }
+  h1,h2,h3{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-.02em;color:var(--ink)}
+  code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+  a{color:var(--indigo)}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+
+  /* NAV */
+  header{position:sticky;top:0;z-index:20;background:rgba(247,248,251,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  nav{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;color:var(--ink);text-decoration:none}
+  .logo-mark{width:30px;height:30px;border-radius:8px;background:var(--ink);display:grid;place-items:center}
+  .logo-mark svg{width:16px;height:16px}
+  .logo small{font-family:'Inter',sans-serif;font-weight:500;color:var(--muted);font-size:.8rem;margin-left:2px}
+  .nav-links{display:flex;gap:26px;list-style:none;margin:0;padding:0}
+  .nav-links a{color:var(--ink-2);text-decoration:none;font-size:.9rem;font-weight:500}
+  .nav-links a:hover{color:var(--ink)}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;font-weight:600;font-size:.9rem;text-decoration:none;border:1px solid transparent;transition:transform .15s,box-shadow .15s,background .15s}
+  .btn-dark{background:var(--ink);color:#fff}
+  .btn-dark:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(15,23,42,.18)}
+  .btn-line{background:var(--paper);color:var(--ink);border-color:var(--line-2)}
+  .btn-line:hover{background:var(--slate-soft)}
+
+  /* HERO */
+  .hero{padding:80px 0 56px;display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:var(--green-soft);color:var(--green);font-size:.8rem;font-weight:600;margin-bottom:22px}
+  .pulse{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(21,128,61,.45)}70%{box-shadow:0 0 0 8px rgba(21,128,61,0)}100%{box-shadow:0 0 0 0 rgba(21,128,61,0)}}
+  .hero h1{font-size:clamp(2.3rem,5.4vw,3.6rem);line-height:1.05;margin:0 0 18px}
+  .hero h1 em{font-style:normal;color:var(--teal)}
+  .lede{font-size:1.1rem;color:var(--ink-2);margin:0 0 28px;max-width:560px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap}
+
+  /* LIVE PANEL */
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--slate-soft);font-size:.78rem;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+  .panel-head .mono{text-transform:none;letter-spacing:0;font-weight:500}
+  .rows{margin:0;padding:6px 0}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:10px 16px;font-size:.88rem;border-bottom:1px dashed var(--line)}
+  .row:last-child{border-bottom:0}
+  .row dt{color:var(--muted)}
+  .row dd{margin:0;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--ink);text-align:right;word-break:break-all}
+  .ok{color:var(--green)}
+
+  /* SECTIONS */
+  section{padding:56px 0}
+  .eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+  .sec-head{max-width:640px;margin-bottom:32px}
+  .sec-head h2{font-size:clamp(1.7rem,3.6vw,2.3rem);margin:0 0 10px;line-height:1.15}
+  .sec-head p{margin:0;color:var(--ink-2)}
+
+  /* ARCHITECTURE */
+  .arch{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px}
+  .flow{display:grid;grid-template-columns:1fr auto 1fr auto 1.3fr auto 1fr;align-items:stretch;gap:10px}
+  .node{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--bg)}
+  .node .tag{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:6px;margin-bottom:8px}
+  .node h3{margin:0 0 6px;font-size:1rem}
+  .node p{margin:0;font-size:.82rem;color:var(--ink-2)}
+  .node ul{margin:6px 0 0;padding-left:16px;font-size:.8rem;color:var(--ink-2)}
+  .n-user .tag{background:var(--slate-soft);color:var(--ink-2)}
+  .n-dns{border-style:dashed}
+  .n-dns .tag{background:var(--green-soft);color:var(--green)}
+  .n-cdn{border-color:#a5b4fc;background:#f5f7ff}
+  .n-cdn .tag{background:var(--indigo-soft);color:var(--indigo)}
+  .n-s3 .tag{background:var(--amber-soft);color:var(--amber)}
+  .arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:.7rem;text-align:center;min-width:56px}
+  .arrow svg{width:36px;height:14px;stroke:var(--line-2);stroke-width:2;fill:none}
+  .arch-note{margin:20px 0 0;padding:14px 16px;background:var(--slate-soft);border-radius:10px;font-size:.88rem;color:var(--ink-2)}
+  .arch-note strong{color:var(--ink)}
+
+  /* ROADMAP */
+  .roadmap{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;transition:transform .2s,border-color .2s}
+  .card:hover{transform:translateY(-3px);border-color:var(--line-2)}
+  .card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .num{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--line-2);font-size:1.6rem;line-height:1}
+  .status{font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:999px}
+  .s-done{background:var(--green-soft);color:var(--green)}
+  .s-wip{background:var(--amber-soft);color:var(--amber)}
+  .s-next{background:var(--slate-soft);color:var(--muted)}
+  .card h3{margin:0 0 6px;font-size:1.05rem}
+  .card p{margin:0 0 14px;font-size:.88rem;color:var(--ink-2);flex:1}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:.72rem;font-weight:600;padding:3px 9px;border-radius:6px;background:var(--slate-soft);color:var(--ink-2);border:1px solid var(--line)}
+  .card a.repo{margin-top:14px;font-size:.85rem;font-weight:600;text-decoration:none}
+
+  /* SKILLS */
+  .skills{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .skill{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .skill h3{margin:0 0 4px;font-size:.95rem;display:flex;align-items:center;gap:8px}
+  .skill p{margin:0;font-size:.82rem;color:var(--muted)}
+  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .d-done{background:var(--green)}
+  .d-wip{background:#f59e0b}
+  .d-next{background:var(--line-2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:.8rem;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+
+  /* LESSONS */
+  .lessons{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .lesson{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;padding:18px 20px}
+  .lesson h3{margin:0 0 6px;font-size:1rem}
+  .lesson p{margin:0;font-size:.88rem;color:var(--ink-2)}
+  .lesson code{font-size:.8rem;background:var(--slate-soft);padding:1px 6px;border-radius:5px}
+
+  /* VERIFY */
+  .term{background:#0f172a;color:#e2e8f0;border-radius:var(--radius);padding:20px;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.9;overflow-x:auto;white-space:pre}
+  .t-m{color:#64748b}.t-g{color:#5eead4}.t-y{color:#fcd34d}
+
+  footer{border-top:1px solid var(--line);background:var(--paper);padding:32px 0;margin-top:40px}
+  .foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
+  .foot a{color:var(--ink-2);text-decoration:none;margin-left:18px}
+  .foot a:hover{color:var(--ink)}
+
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  @media (max-width:960px){
+    .hero{grid-template-columns:1fr;padding:56px 0 40px;gap:32px}
+    .flow{grid-template-columns:1fr}
+    .arrow{flex-direction:row;gap:8px;min-height:30px}
+    .arrow svg{transform:rotate(90deg)}
+    .roadmap{grid-template-columns:1fr 1fr}
+    .skills{grid-template-columns:1fr 1fr}
+    .nav-links{display:none}
+  }
+  @media (max-width:620px){
+    .roadmap,.lessons{grid-template-columns:1fr}
+    .arch{padding:18px}
+    .logo small{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .reveal{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <nav>
+      <a href="#" class="logo">
+        <span class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 10-12h-8z"/></svg>
+        </span>
+        Northwind Edge <small>· AWS Cloud Labs</small>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#lessons">Lessons</a></li>
+      </ul>
+      <a href="https://github.com/MohdSamsad/aws-s3-cloudfront-static-website" class="btn btn-dark" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div>
+      <div class="pill"><span class="pulse"></span> Live on Amazon CloudFront</div>
+      <h1>Learning AWS by <em>building real things.</em></h1>
+      <p class="lede">Northwind Edge is a hands-on AWS Cloud learning lab. The page you're reading is the first project: a static site in a private S3 bucket, delivered worldwide by CloudFront over HTTPS on a custom domain.</p>
+      <div class="cta">
+        <a href="#architecture" class="btn btn-dark">See how this page is served →</a>
+        <a href="#projects" class="btn btn-line">Project roadmap</a>
+      </div>
+    </div>
+
+    <div class="panel reveal" aria-label="Live connection details">
+      <div class="panel-head"><span>Your connection</span><span class="mono" id="clock">—</span></div>
+      <dl class="rows">
+        <div class="row"><dt>Hostname</dt><dd id="d-host">—</dd></div>
+        <div class="row"><dt>Protocol</dt><dd id="d-proto">—</dd></div>
+        <div class="row"><dt>HTTP version</dt><dd id="d-http">—</dd></div>
+        <div class="row"><dt>Page load</dt><dd id="d-load">—</dd></div>
+        <div class="row"><dt>Served by</dt><dd>Amazon CloudFront</dd></div>
+        <div class="row"><dt>Origin</dt><dd>Amazon S3 (private)</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section id="architecture">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Project 1 · Architecture</div>
+      <h2>How this page reached your browser</h2>
+      <p>Four AWS services, no servers. Each box below is something configured by hand in the AWS console while building this project.</p>
+    </div>
+
+    <div class="arch reveal">
+      <div class="flow">
+        <div class="node n-user">
+          <span class="tag">Client</span>
+          <h3>Your browser</h3>
+          <p>Asks DNS for the IP of the domain, then connects over HTTPS.</p>
+        </div>
+        <div class="arrow"><svg viewBox="0 0 36 14"><path d="M0 7h32M26 1l6 6-6 6"/></svg>DNS<br>lookup</div>
+        <div class="node n-dns">
+          <span class="tag">Amazon Route 53</span>
+          <h3>DNS</h3>
+          <p>Alias A/AAAA record at the apex points to CloudFront. Answers once, then steps aside.</p>
+        </div>
+        <div class="arrow"><svg viewBox="0 0 36 14"><path d="M0 7h32M26 1l6 6-6 6"/></svg>HTTPS</div>
+        <div class="node n-cdn">
+          <span class="tag">Amazon CloudFront</span>
+          <h3>Edge delivery</h3>
+          <ul>
+            <li>TLS cert from ACM (us-east-1)</li>
+            <li>HTTP → HTTPS redirect</li>
+            <li>Default root object: index.html</li>
+            <li>CachingOptimized policy</li>
+          </ul>
+        </div>
+        <div class="arrow"><svg viewBox="0 0 36 14"><path d="M0 7h32M26 1l6 6-6 6"/></svg>OAC<br>signed</div>
+        <div class="node n-s3">
+          <span class="tag">Amazon S3</span>
+          <h3>Private origin</h3>
+          <p>Block Public Access on. Only this CloudFront distribution may read the objects.</p>
+        </div>
+      </div>
+      <p class="arch-note"><strong>Route 53 is not in the data path.</strong> It only answers the DNS question. Every request after that goes straight from your browser to the nearest CloudFront edge location, and only cache misses travel on to S3.</p>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Roadmap</div>
+      <h2>Projects, one service at a time</h2>
+      <p>Each project builds on the one before it, reusing the same domain and adding a new layer of AWS.</p>
+    </div>
+
+    <div class="roadmap">
+      <article class="card reveal">
+        <div class="card-top"><span class="num">01</span><span class="status s-done">Complete</span></div>
+        <h3>Static site on S3 + CloudFront</h3>
+        <p>Private S3 origin with Origin Access Control, CloudFront distribution, ACM certificate and Route 53 alias records on a custom domain.</p>
+        <div class="chips"><span class="chip">S3</span><span class="chip">CloudFront</span><span class="chip">ACM</span><span class="chip">Route 53</span></div>
+        <a class="repo" href="https://github.com/MohdSamsad/aws-s3-cloudfront-static-website" target="_blank" rel="noopener">View repository →</a>
+      </article>
+
+      <article class="card reveal">
+        <div class="card-top"><span class="num">02</span><span class="status s-wip">In progress</span></div>
+        <h3>Edge functions + CI/CD</h3>
+        <p>CloudFront Functions for www redirect, clean URLs and security headers. Automated deploys from GitHub Actions using a keyless OIDC role.</p>
+        <div class="chips"><span class="chip">CloudFront Functions</span><span class="chip">IAM OIDC</span><span class="chip">GitHub Actions</span></div>
+      </article>
+
+      <article class="card reveal">
+        <div class="card-top"><span class="num">03</span><span class="status s-next">Planned</span></div>
+        <h3>Origin failover</h3>
+        <p>A second bucket in another region, kept in sync with Cross-Region Replication, behind a CloudFront origin group.</p>
+        <div class="chips"><span class="chip">S3 CRR</span><span class="chip">Origin groups</span></div>
+      </article>
+
+      <article class="card reveal">
+        <div class="card-top"><span class="num">04</span><span class="status s-next">Planned</span></div>
+        <h3>Infrastructure as Code</h3>
+        <p>Rebuild projects 1–3 from a single CloudFormation template, so the whole stack deploys with one command.</p>
+        <div class="chips"><span class="chip">CloudFormation</span></div>
+      </article>
+
+      <article class="card reveal">
+        <div class="card-top"><span class="num">05</span><span class="status s-next">Planned</span></div>
+        <h3>Serverless contact form</h3>
+        <p>A working form on this site that posts to API Gateway, runs a Lambda function and sends email with SES.</p>
+        <div class="chips"><span class="chip">API Gateway</span><span class="chip">Lambda</span><span class="chip">SES</span></div>
+      </article>
+
+      <article class="card reveal">
+        <div class="card-top"><span class="num">06</span><span class="status s-next">Planned</span></div>
+        <h3>Multi-region active-active API</h3>
+        <p>The project 5 backend in two regions, with Route 53 latency routing, health checks and DynamoDB Global Tables.</p>
+        <div class="chips"><span class="chip">Route 53 routing</span><span class="chip">DynamoDB</span></div>
+      </article>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Skills</div>
+      <h2>Services covered so far</h2>
+    </div>
+    <div class="skills reveal">
+      <div class="skill"><h3><span class="dot d-done"></span>Amazon S3</h3><p>Private buckets, bucket policies, OAC</p></div>
+      <div class="skill"><h3><span class="dot d-done"></span>CloudFront</h3><p>Distributions, cache policies, invalidations</p></div>
+      <div class="skill"><h3><span class="dot d-done"></span>ACM</h3><p>DNS-validated public certificates</p></div>
+      <div class="skill"><h3><span class="dot d-done"></span>Route 53</h3><p>Hosted zones, alias records, delegation</p></div>
+      <div class="skill"><h3><span class="dot d-wip"></span>CloudFront Functions</h3><p>Redirects, rewrites, response headers</p></div>
+      <div class="skill"><h3><span class="dot d-wip"></span>IAM + OIDC</h3><p>Least-privilege roles, web identity</p></div>
+      <div class="skill"><h3><span class="dot d-next"></span>CloudFormation</h3><p>Templates, stacks, drift</p></div>
+      <div class="skill"><h3><span class="dot d-next"></span>Lambda + API Gateway</h3><p>Serverless backends</p></div>
+    </div>
+    <div class="legend"><span><span class="dot d-done"></span>Done</span><span><span class="dot d-wip"></span>Learning now</span><span><span class="dot d-next"></span>Up next</span></div>
+  </section>
+
+  <section id="lessons">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Lessons learned</div>
+      <h2>What actually went wrong</h2>
+      <p>The useful part of a hands-on project is the debugging. These came up while building project 1.</p>
+    </div>
+    <div class="lessons">
+      <div class="lesson reveal">
+        <h3>Unlisting a domain doesn't free it</h3>
+        <p>After removing a for-sale listing, the registrar's nameservers still served a parked page. Only switching the nameservers to Route 53 fixed it.</p>
+      </div>
+      <div class="lesson reveal">
+        <h3>Right nameservers, still no site</h3>
+        <p><code>dig NS</code> showed Route 53, but <code>curl</code> said "Could not resolve host". The hosted zone had no apex A record. Checking each DNS layer separately found it.</p>
+      </div>
+      <div class="lesson reveal">
+        <h3>The certificate must live in us-east-1</h3>
+        <p>CloudFront only reads ACM certificates from N. Virginia, wherever the bucket is. A cert in another region never shows up in the dropdown.</p>
+      </div>
+      <div class="lesson reveal">
+        <h3>Test the CloudFront URL first</h3>
+        <p>Checking <code>*.cloudfront.net</code> before touching DNS separates bucket and policy problems from DNS problems.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="verify">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Try it yourself</div>
+      <h2>Inspect this site from a terminal</h2>
+    </div>
+    <div class="term reveal"><span class="t-m"># Which nameservers answer for the domain?</span>
+<span class="t-g">$</span> dig NS <span id="v1">leapmotion.ai</span> +short
+
+<span class="t-m"># Which IPs does Route 53 return? (CloudFront edge addresses)</span>
+<span class="t-g">$</span> dig A <span id="v2">leapmotion.ai</span> +short
+
+<span class="t-m"># Response headers: look for</span> <span class="t-y">x-cache</span> <span class="t-m">and</span> <span class="t-y">x-amz-cf-pop</span>
+<span class="t-g">$</span> curl -sI https://<span id="v3">leapmotion.ai</span></div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>© <span id="yr">2026</span> Northwind Edge · An AWS Cloud learning project. Not a commercial service.</div>
+    <div><a href="#architecture">Architecture</a><a href="#projects">Projects</a><a href="https://github.com/MohdSamsad" target="_blank" rel="noopener">GitHub</a></div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var host = location.hostname || 'localhost';
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    document.getElementById('d-host').textContent = host;
+
+    var proto = document.getElementById('d-proto');
+    if (location.protocol === 'https:') { proto.textContent = 'HTTPS ✓'; proto.className = 'ok'; }
+    else { proto.textContent = location.protocol.replace(':', '').toUpperCase(); }
+
+    if (host !== 'localhost' && host.indexOf('.') !== -1 && !/^\d+\.\d+\.\d+\.\d+$/.test(host)) {
+      ['v1', 'v2', 'v3'].forEach(function (id) { document.getElementById(id).textContent = host.replace(/^www\./, ''); });
+    }
+
+    function tick() {
+      try {
+        document.getElementById('clock').textContent =
+          new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      } catch (e) {}
+    }
+    tick(); setInterval(tick, 1000);
+
+    window.addEventListener('load', function () {
+      try {
+        var nav = performance.getEntriesByType('navigation')[0];
+        if (nav) {
+          var p = nav.nextHopProtocol || '';
+          var map = { 'h2': 'HTTP/2', 'h3': 'HTTP/3', 'http/1.1': 'HTTP/1.1' };
+          document.getElementById('d-http').textContent = map[p] || p || 'unknown';
+          setTimeout(function () {
+            var ms = Math.round(nav.loadEventEnd > 0 ? nav.loadEventEnd : nav.duration);
+            document.getElementById('d-load').textContent = ms + ' ms';
+          }, 0);
+        }
+      } catch (e) {
+        document.getElementById('d-http').textContent = 'unknown';
+      }
+    });
+
+    var els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) {
+      els.forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.1 });
+    els.forEach(function (el, i) {
+      el.style.transitionDelay = (i % 3) * 70 + 'ms';
+      io.observe(el);
+    });
+  })();
+</script>
+</body>
+</html>
